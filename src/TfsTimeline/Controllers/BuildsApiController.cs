@@ -114,6 +114,11 @@ namespace Greenicicle.TfsTimeline.Controllers
                    .FirstOrDefault();
             }
 
+            if (lastFinished == null)
+            {
+                lastFinished = DateTime.Today;
+            }
+
             var lastFinishedParam = lastFinished.Value.ToString("dd-MM-yyyy HH:mm:ss");
 
             var buildTimeline = new
