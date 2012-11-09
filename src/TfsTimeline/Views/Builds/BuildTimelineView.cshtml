@@ -1,0 +1,49 @@
+﻿@model Greenicicle.TfsTimeline.ViewModels.LatestBuildsViewModel
+@{
+    ViewBag.Title = Model.ProjectName + "Builds";
+}
+<script type="text/javascript" src="@Url.Content("~/Scripts/tfs-timeline.viewmodel.build.js")"></script>
+<script type="text/javascript">
+    $(function () {
+        var ciBuildServiceUrl = '@Url.Action("LastBuildsTimeline", "BuildsApi", new { projectName = Model.ProjectName, buildName = Model.BuildName, numberOfBuilds = 5 })';
+        tfsTimeline.buildsViewModel = new tfsTimeline.BuildsViewModel(ciBuildServiceUrl);
+        ko.applyBindings(tfsTimeline.buildsViewModel);
+        tfsTimeline.buildsViewModel.refresh();
+        tfsTimeline.buildsViewModel.updateBuildDuration(new Date());
+    });
+</script>
+<h2 data-bind="visible:isLoading" style="text-align: center">::: Loading :::</h2>
+
+<div data-bind="foreach: { data: builds, afterAdd: handleAfterAdd }"
+    ><div style="display:none;" data-bind="attr: { class: Status }">
+        <div style="margin-bottom: 10px;">
+            <span style="font-weight: bold" data-bind="text: TriggeredBy"></span>
+            <span class="AdditionalInfo" data-bind="text: startedAtTime"></span>
+            <span class="AdditionalInfo" data-bind="text: startedAtDate"></span>
+        </div>
+        <div style="margin-bottom: 10px" data-bind="visible: CheckinComments">
+            &quot;<span data-bind="text: CheckinComments"></span>&quot; 
+            <span class="AdditionalInfo" data-bind="text: WorkItemTitles"></span>
+        </div>
+        <div>
+            <span data-bind="visible:isRunning">
+                ::: Running
+                <span class="Neutral" data-bind="text: runDurationMinutes"></span>
+            </span>
+
+            <span data-bind="visible:TestsTotal">
+                ::: Tests 
+                <span class="Neutral" data-bind="text: TestsTotal"></span> 
+                <span  class="Good" data-bind="text: TestsPassed"></span> 
+                <span  class="Bad" data-bind="text: TestsFailed"></span>
+            </span>    
+                
+            <span data-bind="visible:showFxCop">
+                ::: FxCop
+                <span  class="Bad" data-bind="text: CodeAnalysisErrors"></span>
+                <span  class="Warn" data-bind="text: CodeAnalysisWarnings"></span>
+            </span>
+            :::
+        </div>
+</div></div>
+

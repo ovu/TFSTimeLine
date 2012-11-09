@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="../Content/qunit.css" />
+    <script src="../Scripts/jquery-1.7.1.js"></script>
+    <script src="../Scripts/qunit.js"></script>
+    <script src="../Scripts/knockout.debug.js"></script>
+    <script src="../Scripts/tfs-timeline.common.js"></script>
+    <script src="../Scripts/tfs-timeline.viewmodel.build.js"></script>
+    <script>
+
+        var scenario = {};
+
+        module("viewModel initialization", {
+            setup: function () {
+                scenario.serviceUrl = 'http://greenicicle.com/tfsTimeline/builds';
+                scenario.subject = new tfsTimeline.BuildsViewModel(scenario.serviceUrl);
+            },
+            teardown: function () {
+                scenario = {};
+            }
+        });
+        
+        test("service url is initialized", function () {
+            equal(scenario.subject.serviceUrl, scenario.serviceUrl);
+        });
+
+        test("build list is initialized and empty", function () {
+            equal(scenario.subject.builds().length, 0);
+        });
+
+        test("is loading is true", function () {
+            ok(scenario.subject.isLoading());
+        });
+
+        module("create build view model",  {
+            setup: function () {
+                scenario.subject = new tfsTimeline.BuildsViewModel('');
+                scenario.buildViewModel = scenario.subject.createBuildViewModel({
+                    Uri: "http://greenicicle.com/build/1",
+                    Status: "Running",
+                    StartedAt: "\/Date(1320825600000)\/",
+                    TriggeredBy: "me",
+                    CodeAnalysisErrors : 0,
+                    CodeAnalysisWarnings : 0
+                });
+            },
+            teardown: function () {
+                scenario = {};
+            }
+        });
+
+        test("properties are copied", function () {
+            expect(3);
+            equal(scenario.buildViewModel.Status(), "Running");
+            equal(scenario.buildViewModel.StartedAt(), "\/Date(1320825600000)\/");
+            equal(scenario.buildViewModel.TriggeredBy(), "me");
+        });
+        
+        test("FxCop metrics are displayed if there is an error", function () {
+            scenario.buildViewModel.CodeAnalysisErrors(5);
+            scenario.buildViewModel.CodeAnalysisWarnings(0);
+            equal(scenario.buildViewModel.showFxCop(), true);
+        });
+        
+         test("FxCop metrics are displayed if there is a warning", function () {
+            scenario.buildViewModel.CodeAnalysisErrors(0);
+            scenario.buildViewModel.CodeAnalysisWarnings(3);
+            equal(scenario.buildViewModel.showFxCop(), true);
+        });
+         
+        test("FxCop metrics are not displayed if not required", function () {
+            scenario.buildViewModel.CodeAnalysisErrors(0);
+            scenario.buildViewModel.CodeAnalysisWarnings(0);
+            equal(scenario.buildViewModel.showFxCop(), false);
+        });
+
+        test("isRunning is true when status is 'Running'", function () {
+            scenario.buildViewModel.Status("Running");
+            equal(scenario.buildViewModel.isRunning(), true);
+        });
+
+        test("isRunning is true when status is 'Failed'", function () {
+            scenario.buildViewModel.Status("Failed");
+            equal(scenario.buildViewModel.isRunning(), false);
+        });
+
+        test("start time is formatted", function () {
+            scenario.buildViewModel.StartedAt("\/Date(1320825600000)\/");
+            equal(scenario.buildViewModel.startedAtTime(), "9:00");
+        });
+
+        module("merge builds into list", {
+            setup: function () {
+                scenario.subject = new tfsTimeline.BuildsViewModel('');
+                scenario.subject.mergeBuildIntoList({
+                    Uri: "http://greenicicle.com/build/1",
+                    Status: "Running",
+                    StartedAt: "\/Date(1320825600000)\/",
+                    TriggeredBy: "me",
+                    CodeAnalysisErrors: 0,
+                    CodeAnalysisWarnings: 0
+                });
+            },
+            teardown: function () {
+                scenario = {};
+            }
+        });
+
+        test("new build is added at top position", function () {
+            scenario.subject.mergeBuildIntoList({
+                Uri: "http://greenicicle.com/build/2",
+                Status: "Running",
+                StartedAt: "\/Date(1320825600000)\/",
+                TriggeredBy: "me",
+                CodeAnalysisErrors: 0,
+                CodeAnalysisWarnings: 0
+            });
+
+            expect(3);
+            equal(scenario.subject.builds().length, 2);
+            equal(scenario.subject.builds()[0].Uri(), "http://greenicicle.com/build/2");
+            equal(scenario.subject.builds()[1].Uri(), "http://greenicicle.com/build/1");
+        });
+
+        test("existing build is updated", function () {
+            scenario.subject.mergeBuildIntoList({
+                Uri: "http://greenicicle.com/build/1",
+                Status: "Failed",
+                StartedAt: "\/Date(1320825600000)\/",
+                TriggeredBy: "me",
+                CodeAnalysisErrors: 5,
+                CodeAnalysisWarnings: 0
+            });
+
+            expect(3);
+            equal(scenario.subject.builds().length, 1);
+            equal(scenario.subject.builds()[0].Uri(), "http://greenicicle.com/build/1");
+            equal(scenario.subject.builds()[0].Status(), "Failed");
+        });
+
+        test("build run duration is updated", function () {
+            var currentTime = new Date(2011, 10, 9, 9, 2);
+            scenario.subject.updateBuildDuration(currentTime);
+
+            expect(2);
+            equal(scenario.subject.builds()[0].runDuration(), 120);
+            equal(scenario.subject.builds()[0].runDurationMinutes(), "2:00");
+        });
+
+        test("build run duration is scheduled to update", function () {
+            // this is a tricky one. It deals with a timed callback that uses the 
+            // current time as a parameter.
+
+            // For the callback to work, stuff the test subject into its production
+            // namespace.
+            tfsTimeline.buildsViewModel = scenario.subject;
+            
+            // replace the setTimeout function with test double.
+            var stashSetTimeout = tfsTimeline.setTimeout;
+            var currentTime = new Date(2011, 10, 9, 9);
+            var timeout = 0;
+            tfsTimeline.setTimeout = function (command, milliseconds) {
+                // when the callbak occurrs, remember the milliseconds parameter, and
+                // execute the command - but only once, otherwise we'd have a nice 
+                // endless loop.
+                if (timeout === 0) {
+                    timeout = milliseconds;
+                    eval(command);
+                }
+            };
+
+            scenario.subject.updateBuildDuration(currentTime);
+
+            expect(2);
+            // The test double setTimeout function was called...
+            equal(timeout, 1000);
+            // ... and the runDuration should be updated to a longer value
+            // than zero, which it would be if updateBuildDuration had been called
+            // only once.
+            notEqual(scenario.subject.builds()[0].runDuration(), 0);
+
+            tfsTimeline.setTimeout = stashSetTimeout;
+        });
+    </script>
+</head>
+<body>
+    <h1 id="qunit-header">
+        tfs-timeline.viewmodel.build.js</h1>
+    <h2 id="qunit-banner">
+    </h2>
+    <ol id="qunit-tests">
+    </ol>
+    <div id="main">
+    </div>
+</body>
+</html>
