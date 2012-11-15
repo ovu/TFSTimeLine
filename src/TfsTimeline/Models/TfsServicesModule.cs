@@ -14,7 +14,9 @@ namespace Greenicicle.TfsTimeline.Models
         public override void Load()
         {
             var teamFoundationServerUrl = ConfigurationManager.AppSettings["TeamFoundationServerUrl"];
-            var tfs = new TfsTeamProjectCollection(TfsTeamProjectCollection.GetFullyQualifiedUriForName(teamFoundationServerUrl));
+            var tfsUser = ConfigurationManager.AppSettings["TFS_User"];
+            var tfsPassword = ConfigurationManager.AppSettings["TFS_Password"];
+            var tfs = new TfsTeamProjectCollection(TfsTeamProjectCollection.GetFullyQualifiedUriForName(teamFoundationServerUrl), new NetworkCredential(tfsUser, tfsPassword));
 
             Bind<IBuildServer>().ToMethod(ctx => tfs.GetService<IBuildServer>());
             Bind<VersionControlServer>().ToMethod(ctx => tfs.GetService<VersionControlServer>());
