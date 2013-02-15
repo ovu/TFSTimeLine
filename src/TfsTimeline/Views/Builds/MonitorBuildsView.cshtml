@@ -1,0 +1,136 @@
+﻿@model TfsTimeline.ViewModels.BuildMonitoringViewModel
+
+@{
+    ViewBag.Title = "MonitorBuildsView";
+}
+
+<script type="text/javascript" src="@Url.Content("~/Scripts/underscore.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Scripts/backbone.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Scripts/tfs-timeline.viewmodel.build.js")"></script>
+
+<h2>Builds Summary</h2>
+
+<div id= "buildsList">:::Loading:::</div>
+
+<script type="text/template" id="buildsTemplate">    
+  <div id="builds-list">
+  <% _.each(collection, function(buildDefinition) { %>
+    <div class='Monitor <%=buildDefinition.Status %>'>
+     <div>
+         <span class='Titel'>Build Name: <%= buildDefinition.BuildName %></span>
+     </div>
+     <div>
+        <%= buildDefinition.Status %>
+     </div>
+     <div>
+        Requested by: <span class='AdditionalInfo'><%=buildDefinition.TriggeredBy %></span>
+     </div>
+     <div>
+        Comments: <%=buildDefinition.CheckinComments %>
+     </div>
+     <div>
+        Started on: <span class='AdditionalInfo'><%=buildDefinition.StartedAtTime %> <%=buildDefinition.StartedAt %> </span>
+     </div>
+     <% if (buildDefinition.Status !== 'Running'){%>
+         <div>
+            Completed on: <span class='AdditionalInfo'><%=buildDefinition.FinishedAtTime %> <%=buildDefinition.FinishedAt %> </span>
+         </div>
+     <%};%>
+     <div>
+        Test results: <span class='Good'><%=buildDefinition.TestsPassed %> passed</span>, 
+                      <span class='Bad'><%=buildDefinition.TestsFailed%> failed</span>, 
+                      <span class='Neutral'> <%=buildDefinition.TestsTotal%> total</span>.
+     </div>
+    </div>
+  <% }); %>
+  </div>
+
+</script>
+
+<script language="javascript" type="text/javascript">
+    @{
+        string buildsCommaSeparated = Model.BuildDefinitionsCommaSeparated;
+    }
+
+    // Model definition
+    var BuildModel = Backbone.Model.extend({
+    });
+
+
+    // View definition
+    var BuildsView = Backbone.View.extend({
+        el: '#buildsList',
+        template: _.template($('#buildsTemplate').html()),
+        render: function() {
+            $(this.el).html(this.template({collection: this.model.toJSON()}));
+        }
+    });
+
+    var builds = [@Html.Raw(buildsCommaSeparated)];
+    var buildMonitorUrl = '@Html.Raw(@Model.BuildMonitoringUrl)';
+
+    var buildsParam = { 'buildNames': builds};
+
+    var buildsParamString = JSON.stringify(buildsParam);
+
+    // Collection definition
+    var BuildsCollection = Backbone.Collection.extend({
+        model : BuildModel,
+        urlRoot : buildMonitorUrl,
+        longPolling : false,
+        intervalSeconds: 20,
+        initialize : function() {
+           // _.bindAll(this);
+        },
+        startLongPolling : function (intervalSecondsParam) {
+            this.longPolling = true;
+            if (intervalSecondsParam) {
+                this.intervalSeconds = intervalSecondsParam;
+            }
+            this.executeLongPolling();
+        },
+        stopLongPolling : function () {
+            this.longPolling = false;
+        },
+        executeLongPolling : function () {
+            var that = this;
+            this.fetch({type : 'POST', contentType: "application/json", data: buildsParamString, success: function (receivedBuilds) {
+                                                                                        that.processReceivedBuilds(receivedBuilds);
+                                                                                    }
+            });
+        },
+        processReceivedBuilds : function (receivedBuilds) {
+            // Format builds dates to short time
+            receivedBuilds.forEach(function (build){
+                var startedAtJsonDateTime = tfsTimeline.parseJsonDate(build.get('StartedAt'));            
+                var startedAtFormatted = tfsTimeline.formatShortDateWithYear(startedAtJsonDateTime);
+                var startedAtTime = tfsTimeline.formatShortTime(startedAtJsonDateTime);
+                build.set('StartedAt', startedAtFormatted);
+                build.set('StartedAtTime', startedAtTime);
+                        
+                var finishedAtJsonDateTime = tfsTimeline.parseJsonDate(build.get('FinishedAt'));            
+                var finishedAtFormatted = tfsTimeline.formatShortDateWithYear(finishedAtJsonDateTime);
+                var finishedAtTime = tfsTimeline.formatShortTime(finishedAtJsonDateTime);
+                build.set('FinishedAt', finishedAtFormatted);
+                build.set('FinishedAtTime', finishedAtTime);            
+            });
+            
+            // Build the View
+            var buildsView = new BuildsView({model: receivedBuilds});
+            buildsView.render();
+
+            if (this.longPolling) {
+                var that = this;
+                setTimeout(function (){ that.executeLongPolling();}, 1000 * that.intervalSeconds);
+            }
+        }
+    });
+
+    var buildsCollection = new BuildsCollection();
+    buildsCollection.url = buildMonitorUrl;
+    buildsCollection.startLongPolling();
+    buildsCollection.on('reset', function() { console.log('Collection fetched'); });
+
+</script>
+
+

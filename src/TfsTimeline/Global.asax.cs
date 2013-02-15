@@ -5,7 +5,7 @@ using System.Web.Routing;
 using Ninject;
 using Ninject.Web.Common;
 
-namespace Greenicicle.TfsTimeline
+namespace TfsTimeline
 {
     public class MvcApplication : NinjectHttpApplication
     {
@@ -40,6 +40,11 @@ namespace Greenicicle.TfsTimeline
 
             routes.MapRoute(
                 null,
+                "monitorbuilds/{projectName}/",
+                new { controller = "Builds", action = "MonitorBuildsView" });
+
+            routes.MapRoute(
+                null,
                 "api/builds",
                 new { controller = "BuildsApi", action = "ProjectNames" });
             
@@ -57,6 +62,12 @@ namespace Greenicicle.TfsTimeline
                 null,
                 "api/lastbuilds/{projectName}/{buildName}",
                 new { controller = "BuildsApi", action = "LastBuildsTimeline" });
+
+            routes.MapRoute(
+                null,
+                "api/monitorbuilds/{projectName}",
+                new { controller = "BuildsApi", action = "LastBuildResults" });
+                
         }
 
         protected override void OnApplicationStarted()

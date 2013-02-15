@@ -50,6 +50,15 @@ tfsTimeline.formatShortDate = function(time) {
     return currentDate + "-" + monthNames[currentMonth];
 };
 
+tfsTimeline.formatShortDateWithYear = function (time) {
+    var monthNames = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December");
+    var currentDate = time.getDate();
+    var currentMonth = time.getMonth();
+    var currentYear = time.getFullYear();
+
+    return currentDate + "-" + monthNames[currentMonth] + " " + currentYear;
+};
+
 tfsTimeline.padLeadingZero = function (number) {
     return ("0" + number).slice(-2);
 };

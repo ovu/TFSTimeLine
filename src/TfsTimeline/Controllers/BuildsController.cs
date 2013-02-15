@@ -1,10 +1,11 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
 
-using Greenicicle.TfsTimeline.Models;
-using Greenicicle.TfsTimeline.ViewModels;
+using TfsTimeline.Models;
+using TfsTimeline.ViewModels;
 
-namespace Greenicicle.TfsTimeline.Controllers
+namespace TfsTimeline.Controllers
 {
     public class BuildsController : Controller
     {
@@ -34,20 +35,42 @@ namespace Greenicicle.TfsTimeline.Controllers
         {
             var buildNames = buildService.GetBuildDefinitions(projectName);
 
-            var viewModel = new LinkListViewModel
+            var viewModel = new BuildDefinitionListViewModel
             {
                 Title = string.Format("Builds for project {0}", projectName),
-                Links = buildNames.ToDictionary(
-                    buildName => Url.Action("BuildTimelineView", new { projectName, buildName }),
-                    buildName => buildName)
             };
 
-            return View("LinkListView", viewModel);
+            viewModel.BuildDefinitionList = new List<BuildDefinitionViewModel>();
+
+            foreach (var buildName in buildNames)
+            {
+                viewModel.BuildDefinitionList.Add(new BuildDefinitionViewModel()
+                    {
+                        BuildName = buildName,
+                        Link = Url.Action("BuildTimelineView", new { projectName, buildName })
+                    });
+            }
+
+            return View("BuildDefinitionsView", viewModel);
         }
 
         public ActionResult BuildTimelineView(string projectName, string buildName)
         {
             return View(new LatestBuildsViewModel { ProjectName = projectName, BuildName = buildName });
+        }
+
+        [HttpPost]
+        public ActionResult MonitorBuildsView(string projectName, string [] builds)
+        {
+            var selectedBuilds = builds.ToList().Where(x => x != "false").ToList();
+
+            var buildMonioringViewModel = new BuildMonitoringViewModel
+                {
+                    BuildDefinitions = selectedBuilds,
+                    BuildMonitoringUrl = this.Url.Action("LastBuildResults", "BuildsApi")
+                };
+
+            return View(buildMonioringViewModel);
         }
     }
 }

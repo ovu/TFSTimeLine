@@ -2,10 +2,10 @@
 
 namespace TfsTimeline.ViewModels
 {
-    public class LinkListViewModel
+    public class BuildDefinitionListViewModel
     {
         public string Title { get; set; }
 
-        public IDictionary<string, string> Links { get; set; }
+        public List<BuildDefinitionViewModel> BuildDefinitionList { get; set; }
     }
 }

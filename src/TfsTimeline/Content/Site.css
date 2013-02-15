@@ -4,7 +4,7 @@ body
     color: white;
     font-size: large;
     font-family: Consolas, Arial;
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 
 header, footer, nav, section
@@ -116,8 +116,49 @@ textarea
     margin-bottom: 30px;
 }
 
+
+.Unknown.Monitor
+{
+    border-left: 35px solid black;
+    padding-left: 10px;
+    margin-bottom: 30px;
+}
+
+.Queued.Monitor
+{
+    border-left: 35px solid gray;
+    padding-left: 10px;
+    margin-bottom: 30px;
+}
+
+.Succeeded.Monitor
+{
+    border-left: 35px solid limegreen;
+    padding-left: 10px;
+    margin-bottom: 30px;
+}
+
+.Failed.Monitor
+{
+    border-left: 35px solid tomato;
+    padding-left: 10px;
+    margin-bottom: 30px;
+}
+
+.Running.Monitor
+{
+    border-left: 35px solid gold;
+    padding-left: 10px;
+    margin-bottom: 30px;
+}
+
+
 /* Text blocks
 -----------------------------------------------------------*/
+.Titel 
+{
+    font-size: xx-large;    
+}
 
 .Weak
 {
@@ -130,7 +171,7 @@ textarea
 
 .Metrics
 {
-    font-size: medium;
+    font-size: medium;    
 }
 
 /* Styles for metric indicators

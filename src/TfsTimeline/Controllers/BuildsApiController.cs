@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using System.Web.UI;
 
-using Greenicicle.TfsTimeline.Models;
+using TfsTimeline.Models;
 
-namespace Greenicicle.TfsTimeline.Controllers
+namespace TfsTimeline.Controllers
 {
     public class BuildsApiController : Controller
     {
@@ -129,6 +131,36 @@ namespace Greenicicle.TfsTimeline.Controllers
             };
 
             return Json(buildTimeline);
+        }
+
+        [HttpPost]
+        [OutputCache(Duration = 15, Location = OutputCacheLocation.Server)]
+        public ActionResult LastBuildResults(string projectName, List<string> buildNames)
+        {
+            const int NumberOfBuilds = 1;
+
+            var buildsList = new List<BuildInformation>();
+
+            foreach (var buildName in buildNames)
+            {
+                var builds = buildService.GetLastBuilds(projectName, buildName, NumberOfBuilds)
+                    .OrderBy(b => b.StartedAt)
+                    .ToList();
+
+                if (!builds.Any())
+                {
+                    buildsList.Add(new BuildInformation { BuildName = buildName });
+                }
+                else
+                {
+                    var build = builds.First();
+                    build.BuildName = buildName;
+
+                    buildsList.Add(build);
+                }
+            }
+
+            return Json(buildsList);
         }
     }
 }

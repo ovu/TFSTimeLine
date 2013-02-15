@@ -3,7 +3,7 @@ using System.Linq;
 
 using Microsoft.TeamFoundation.Build.Client;
 
-namespace Greenicicle.TfsTimeline.Models
+namespace TfsTimeline.Models
 {
     public static class BuildDetailExtensions
     {

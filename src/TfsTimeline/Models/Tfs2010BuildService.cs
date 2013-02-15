@@ -6,7 +6,7 @@ using Microsoft.TeamFoundation.Build.Client;
 using Microsoft.TeamFoundation.TestManagement.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
-namespace Greenicicle.TfsTimeline.Models
+namespace TfsTimeline.Models
 {
     public class Tfs2010BuildService : IBuildService
     {

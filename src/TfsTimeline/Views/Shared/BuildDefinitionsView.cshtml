@@ -1,0 +1,25 @@
+﻿@model TfsTimeline.ViewModels.BuildDefinitionListViewModel
+
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>@Model.Title</title>
+    </head>
+    <body>
+        <h1>::: Build Monitor :::</h1>
+        <h2>@Model.Title</h2>
+        @using (Html.BeginForm("MonitorBuildsView", "Builds"))
+        {
+            <input type="submit" value="Monitor selected Builds" />
+            foreach (var buildDefinition in Model.BuildDefinitionList)
+            {
+                <div>
+                    @Html.CheckBox("builds", buildDefinition.Selected, new { value = buildDefinition.BuildName })
+                    <a href="@buildDefinition.Link">@buildDefinition.BuildName</a>
+                </div>
+            }
+        }
+    </body>
+</html>

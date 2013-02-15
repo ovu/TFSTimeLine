@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Greenicicle.TfsTimeline.Models
+namespace TfsTimeline.Models
 {
     public class BuildInformation
     {
@@ -33,5 +33,7 @@ namespace Greenicicle.TfsTimeline.Models
         public string CheckinComments { get; set; }
 
         public string WorkItemTitles { get; set; }
+
+        public string BuildName { get; set; }
     }
 }

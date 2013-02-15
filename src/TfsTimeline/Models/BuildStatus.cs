@@ -1,4 +1,4 @@
-﻿namespace Greenicicle.TfsTimeline.Models
+﻿namespace TfsTimeline.Models
 {
     public enum BuildStatus
     {

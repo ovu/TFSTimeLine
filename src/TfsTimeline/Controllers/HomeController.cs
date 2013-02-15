@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Web.Mvc;
 
-using Greenicicle.TfsTimeline.ViewModels;
+using TfsTimeline.ViewModels;
 
-namespace Greenicicle.TfsTimeline.Controllers
+namespace TfsTimeline.Controllers
 {
     public class HomeController : Controller
     {

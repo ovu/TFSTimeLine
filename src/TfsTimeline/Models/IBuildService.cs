@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Greenicicle.TfsTimeline.Models
+namespace TfsTimeline.Models
 {
     public interface IBuildService
     {

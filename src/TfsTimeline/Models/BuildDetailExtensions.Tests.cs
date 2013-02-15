@@ -5,7 +5,7 @@ using Moq;
 
 using Ploeh.AutoFixture;
 
-namespace Greenicicle.TfsTimeline.Models
+namespace TfsTimeline.Models
 {
     public class GetStaticAnalysisInfoTests
     {

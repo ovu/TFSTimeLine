@@ -7,7 +7,7 @@ using Microsoft.TeamFoundation.VersionControl.Client;
 
 using Ninject.Modules;
 
-namespace Greenicicle.TfsTimeline.Models
+namespace TfsTimeline.Models
 {
     public class TfsServicesModule : NinjectModule
     {
