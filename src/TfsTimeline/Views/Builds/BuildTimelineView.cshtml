@@ -5,17 +5,27 @@
 <script type="text/javascript" src="@Url.Content("~/Scripts/tfs-timeline.viewmodel.build.js")"></script>
 <script type="text/javascript">
     $(function () {
+        ko.bindingHandlers.classFor = {
+            update: function (element, valueAccessor) {
+                var elem = $(element);
+                val = ko.utils.unwrapObservable(valueAccessor());
+                elem.attr('class', val);
+            }
+        };
+
         var ciBuildServiceUrl = '@Url.Action("LastBuildsTimeline", "BuildsApi", new { projectName = Model.ProjectName, buildName = Model.BuildName, numberOfBuilds = 5 })';
         tfsTimeline.buildsViewModel = new tfsTimeline.BuildsViewModel(ciBuildServiceUrl);
         ko.applyBindings(tfsTimeline.buildsViewModel);
         tfsTimeline.buildsViewModel.refresh();
         tfsTimeline.buildsViewModel.updateBuildDuration(new Date());
     });
+    
+    
 </script>
 <h2 data-bind="visible:isLoading" style="text-align: center">::: Loading :::</h2>
 
 <div data-bind="foreach: { data: builds, afterAdd: handleAfterAdd }"
-    ><div style="display:none;" data-bind="attr: { class: Status }">
+    ><div style="display:none;" data-bind="classFor: Status">
         <div style="margin-bottom: 10px;">
             <span style="font-weight: bold" data-bind="text: TriggeredBy"></span>
             <span class="AdditionalInfo" data-bind="text: startedAtTime"></span>

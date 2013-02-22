@@ -7,8 +7,9 @@
 <script type="text/javascript" src="@Url.Content("~/Scripts/underscore.js")"></script>
 <script type="text/javascript" src="@Url.Content("~/Scripts/backbone.js")"></script>
 <script type="text/javascript" src="@Url.Content("~/Scripts/tfs-timeline.viewmodel.build.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Scripts/json2.js")"></script>
 
-<h2>Builds Summary</h2>
+<h2>Builds summary</h2>
 
 <div id= "buildsList">:::Loading:::</div>
 
@@ -23,13 +24,10 @@
          <% } %>
      </div>
      <div>
-        <%= buildDefinition.Status %>
-     </div>
-     <div>
         Requested by: <span class='AdditionalInfo'><%=buildDefinition.TriggeredBy %></span>
      </div>
      <div>
-        Comments: <%=buildDefinition.CheckinComments %>
+        Comments: <%=tfsTimeline.truncateString(buildDefinition.CheckinComments, 250)%>
      </div>
      <div>
         Started on: <span class='AdditionalInfo'><%=buildDefinition.StartedAtTime %> <%=buildDefinition.StartedAt %> </span>

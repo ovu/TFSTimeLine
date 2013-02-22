@@ -121,35 +121,35 @@ textarea
 {
     border-left: 35px solid black;
     padding-left: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .Queued.Monitor
 {
     border-left: 35px solid gray;
     padding-left: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .Succeeded.Monitor
 {
     border-left: 35px solid limegreen;
     padding-left: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .Failed.Monitor
 {
     border-left: 35px solid tomato;
     padding-left: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .Running.Monitor
 {
     border-left: 35px solid gold;
     padding-left: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 

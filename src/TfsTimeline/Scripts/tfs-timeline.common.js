@@ -66,3 +66,7 @@ tfsTimeline.padLeadingZero = function (number) {
 tfsTimeline.setTimeout = function (command, milliseconds) {
     setTimeout(command, milliseconds);
 };
+
+tfsTimeline.truncateString = function(aString, maxLength) {
+    return aString.substr(0, maxLength - 1) + (aString.length > maxLength ? '&hellip;' : '');
+};
